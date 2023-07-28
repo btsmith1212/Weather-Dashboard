@@ -6,6 +6,7 @@ const locationButton = document.querySelector(".location-btn");
 const currentWeatherDiv = document.querySelector(".current-weather");
 const weatherCardsDiv = document.querySelector(".weather-cards");
 // added global variables
+
 const createWeatherCard = (cityName, weatherItem, index) => {
     if(index === 0) {
         return `<div class="details">
@@ -32,7 +33,8 @@ const createWeatherCard = (cityName, weatherItem, index) => {
 const getWeatherDetails = (cityName, latitude, longitude) => {
     const WEATHER_API_URL = `https://api.openweathermap.org/data/2.5/forecast?lat=${latitude}&lon=${longitude}&appid=${APIKEY}&units=imperial`;
     //gets weather data from latitude and longitude, set units to imperial
-    fetch(WEATHER_API_URL).then(response => response.json()).then(data => {
+    fetch(WEATHER_API_URL).then(response => response.json())
+    .then(data => {
         const uniqueForecastDays = [];
         const fiveDaysForecast = data.list.filter(forecast => {
             const forecastDate = new Date(forecast.dt_txt).getDate();
@@ -61,7 +63,11 @@ const getCityCoordinates = () => {
     if (cityName === "") return;
     const API_URL = `https://api.openweathermap.org/geo/1.0/direct?q=${cityName}&limit=1&appid=${APIKEY}`;
     
-    fetch(API_URL).then(response => response.json()).then(data => {
+    fetch(API_URL).then(response => response.json())
+    .then(data => {
+        console.log(data);
+        localStorage.setItem("searches", JSON.stringify(data));
+        console.log(data);
         if (!data.length) return alert(`No coordinates found for ${cityName}`);
         const { lat, lon, name } = data[0];
         getWeatherDetails(name, lat, lon);
@@ -75,7 +81,8 @@ const getUserCoordinates = () => {
         position => {
             const { latitude, longitude } = position.coords; 
             const API_URL = `https://api.openweathermap.org/geo/1.0/reverse?lat=${latitude}&lon=${longitude}&limit=1&appid=${APIKEY}`;
-            fetch(API_URL).then(response => response.json()).then(data => {
+            fetch(API_URL).then(response => response.json())
+            .then(data => {
                 const { name } = data[0];
                 getWeatherDetails(name, latitude, longitude);
             }).catch(() => {
@@ -91,8 +98,40 @@ const getUserCoordinates = () => {
             }
         });
 }
+
+var recentSearches = JSON.parse(localStorage.getItem("searches")) || [];
+console.log(recentSearches);
+var searchHistory = document.getElementById("recently-viewed");
+getCityCoordinates("");
+
+
 //error if geolocation fails on use current location
+cityInput.addEventListener("keyup", e => e.key === "Enter" && getCityCoordinates());
 locationButton.addEventListener("click", getUserCoordinates);
 searchButton.addEventListener("click", getCityCoordinates);
-cityInput.addEventListener("keyup", e => e.key === "Enter" && getCityCoordinates());
 //event listeners for user click on city name entry or use current location, keyup to press enter instead of clicking search
+
+function addRecentSearch(city) {
+    cityInput.addEventListener("click", function(event) {
+        var searchCity = city.value.trim();
+        executeSearch(searchCity);
+        addRecentSearch(searchCity);
+});
+}
+
+function addRecentSearch(city) {
+    var recentButton = document.createElement("button");
+    recentButton.textContent = city;
+    recentButton.addEventListener("click", function () {
+      executeSearch(city);
+    });
+    searchHistory.appendChild(recentButton);
+  }
+  
+function executeSearch(searchCity) {
+    recentSearches.push(searchCity);
+    localStorage.setItem("searches", JSON.stringify(recentSearches));
+    getWeather(searchCity);
+  }
+
+  //couldnt get event listener to work to pull from local for recently viewed

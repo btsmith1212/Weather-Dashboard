@@ -21,5 +21,10 @@ Please refer to the LICENSE in the repo.
 
 ## Code Sources
 
+https://github.com/btsmith1212/Weather-Dashboard.git
+
+https://btsmith1212.github.io/Weather-Dashboard/
 
 ## Screenshot
+
+<img width="958" alt="Capture" src="https://github.com/btsmith1212/Weather-Dashboard/assets/135077506/92a83ff4-33b6-4678-a855-03ceccde2a4c">
